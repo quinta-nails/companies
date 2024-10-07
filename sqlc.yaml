@@ -1,0 +1,10 @@
+version: "2"
+sql:
+  - engine: "postgresql"
+    queries: "internal/db/query.sql"
+    schema: "db/migrations"
+    rules:
+      - sqlc/db-prepare
+    gen:
+      go:
+        out: "internal/db"

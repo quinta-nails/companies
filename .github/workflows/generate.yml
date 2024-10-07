@@ -1,0 +1,125 @@
+name: Generate
+env:
+  GO_VERSION: '1.23'
+on:
+  push:
+
+permissions:
+  contents: write
+
+jobs:
+  sqlc:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '${{ env.GO_VERSION }}'
+
+    - name: Cache SQLC
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/sqlc
+        key: "${{ runner.os }}-sqlc-${{ hashFiles('**/go.sum') }}"
+        restore-keys: |
+          ${{ runner.os }}-sqlc-
+
+    - name: Install SQLC
+      run: |
+        if [ ! -d ~/.cache/sqlc ]; then
+          mkdir -p ~/.cache/sqlc
+          GOBIN=~/.cache/sqlc go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
+        fi
+        echo "~/.cache/sqlc" >> $GITHUB_PATH
+
+    - name: Generate SQLC code
+      run: sqlc generate
+
+    - name: Check for changes
+      id: check-changes
+      run: |
+        if [ -n "$(git status --porcelain)" ]; then
+          echo "HAS_CHANGED=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "No changes to commit" >> $GITHUB_STEP_SUMMARY
+        fi
+
+    - name: Push sqlc generated code
+      if: steps.check-changes.outputs.HAS_CHANGED == 'true'
+      run: |
+        git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Update generated go code"
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+        
+          NEW_COMMIT_HASH=$(git rev-parse HEAD)
+          echo "Pushed changes: [$NEW_COMMIT_HASH](https://github.com/${{ github.repository }}/commit/$NEW_COMMIT_HASH)"  >> $GITHUB_STEP_SUMMARY
+  envdoc:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '${{ env.GO_VERSION }}'
+
+    - name: Install envdoc
+      run: go install github.com/g4s8/envdoc@latest
+
+    - name: Generate envdoc code
+      run: |
+        echo "//go:generate envdoc -format dotenv -output .env.example -dir . -files * -types *Config
+        package main
+        " > envdoc.go
+        go generate
+        rm envdoc.go
+
+    - name: Check for changes
+      id: check-changes
+      run: |
+        if [ -n "$(git status --porcelain)" ]; then
+          echo "HAS_CHANGED=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "No changes to commit" >> $GITHUB_STEP_SUMMARY
+        fi
+
+    - name: Push .env.example
+      if: steps.check-changes.outputs.HAS_CHANGED == 'true'
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git add .env.example
+        git commit -m "Update .env.example"
+        git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          
+        NEW_COMMIT_HASH=$(git rev-parse HEAD)
+        echo "Pushed .env.example changes: [$NEW_COMMIT_HASH](https://github.com/${{ github.repository }}/commit/$NEW_COMMIT_HASH)"  >> $GITHUB_STEP_SUMMARY
+
+    - name: Update Wiki
+      if: steps.check-changes.outputs.HAS_CHANGED == 'true'
+      run: |
+        echo "//go:generate envdoc -format markdown -output EnvironmentVariables.md -dir . -files * -types *Config
+        package main
+        " > envdoc.go
+        go generate
+        
+        git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.wiki.git wiki
+        cp EnvironmentVariables.md wiki/EnvironmentVariables.md
+        
+        cd wiki
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git add .
+        git commit -m "Update Wiki environment variables"
+        git push
+        
+        NEW_COMMIT_HASH=$(git rev-parse HEAD)
+        echo "Pushed Wiki environment variables changes: [$NEW_COMMIT_HASH](https://github.com/${{ github.repository }}/commit/$NEW_COMMIT_HASH)"  >> $GITHUB_STEP_SUMMARY
