@@ -35,7 +35,7 @@ func ListenAndServe(grpcServer *grpc.Server) error {
 		return err
 	}
 
-	log.Println(fmt.Sprintf("server is listening on port %d...", cfg.Port))
+	log.Printf("\nserver is listening on port %d...", cfg.Port)
 
 	return grpcServer.Serve(listener)
 }
