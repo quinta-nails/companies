@@ -15,7 +15,7 @@ func (s *Service) Reserve(ctx context.Context, in *pb.ReserveRequest) (*pb.Reser
 		return nil, err
 	}
 
-	err = s.db.AddAppointments(ctx, db.AddAppointmentsParams{
+	err = s.db.AddReserves(ctx, db.AddReservesParams{
 		UserID: sql.NullInt64{
 			Int64: in.UserId,
 			Valid: in.UserId > 0,

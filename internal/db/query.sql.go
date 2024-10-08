@@ -11,8 +11,8 @@ import (
 	"time"
 )
 
-const addAppointments = `-- name: AddAppointments :exec
-INSERT INTO appointments (
+const addReserves = `-- name: AddReserves :exec
+INSERT INTO reserves (
     user_id,
     service_id,
     datetime
@@ -25,13 +25,13 @@ VALUES (
 ON CONFLICT (user_id, service_id, datetime) DO NOTHING
 `
 
-type AddAppointmentsParams struct {
+type AddReservesParams struct {
 	UserID    sql.NullInt64
 	ServiceID sql.NullInt64
 	Datetime  time.Time
 }
 
-func (q *Queries) AddAppointments(ctx context.Context, arg AddAppointmentsParams) error {
-	_, err := q.db.ExecContext(ctx, addAppointments, arg.UserID, arg.ServiceID, arg.Datetime)
+func (q *Queries) AddReserves(ctx context.Context, arg AddReservesParams) error {
+	_, err := q.db.ExecContext(ctx, addReserves, arg.UserID, arg.ServiceID, arg.Datetime)
 	return err
 }

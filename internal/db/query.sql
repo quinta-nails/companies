@@ -1,5 +1,5 @@
--- name: AddAppointments :exec
-INSERT INTO appointments (
+-- name: AddReserves :exec
+INSERT INTO reserves (
     user_id,
     service_id,
     datetime

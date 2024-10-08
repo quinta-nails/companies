@@ -61,7 +61,7 @@ CREATE TABLE service_prices (
 CREATE TYPE appointment_status AS ENUM ('Scheduled', 'Completed', 'Cancelled');
 
 -- Таблица записей клиентов
-CREATE TABLE appointments (
+CREATE TABLE reserves (
     "id" BIGSERIAL PRIMARY KEY,
     "user_id" BIGSERIAL,
     "service_id" BIGSERIAL REFERENCES services ON DELETE CASCADE,
@@ -71,7 +71,7 @@ CREATE TABLE appointments (
     UNIQUE ("user_id", "service_id", "datetime")
 );
 
-COMMENT ON INDEX appointments_user_id_service_id_start_time_key IS 'Уникальный индекс на комбинацию user_id, service_id и start_time для предотвращения дублирования записей на одну и ту же услугу в одно и то же время';
+COMMENT ON INDEX reserves_user_id_service_id_start_time_key IS 'Уникальный индекс на комбинацию user_id, service_id и start_time для предотвращения дублирования записей на одну и ту же услугу в одно и то же время';
 
 -- Функция для проверки даты
 CREATE OR REPLACE FUNCTION check_price_date()

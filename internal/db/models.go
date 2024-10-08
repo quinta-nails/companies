@@ -54,15 +54,6 @@ func (ns NullAppointmentStatus) Value() (driver.Value, error) {
 	return string(ns.AppointmentStatus), nil
 }
 
-type Appointment struct {
-	ID        int64
-	UserID    sql.NullInt64
-	ServiceID sql.NullInt64
-	Datetime  time.Time
-	Status    AppointmentStatus
-	CreatedAt time.Time
-}
-
 type Company struct {
 	ID        int64
 	Name      string
@@ -72,6 +63,15 @@ type Company struct {
 type Position struct {
 	ID        int64
 	Name      string
+	CreatedAt time.Time
+}
+
+type Reserf struct {
+	ID        int64
+	UserID    sql.NullInt64
+	ServiceID sql.NullInt64
+	Datetime  time.Time
+	Status    AppointmentStatus
 	CreatedAt time.Time
 }
 
