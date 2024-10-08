@@ -98,8 +98,8 @@ jobs:
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git add .env.example
         git commit -m "Update .env.example"
-        git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
-          
+        git push -f https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+        
         NEW_COMMIT_HASH=$(git rev-parse HEAD)
         echo "Pushed .env.example changes: [$NEW_COMMIT_HASH](https://github.com/${{ github.repository }}/commit/$NEW_COMMIT_HASH)"  >> $GITHUB_STEP_SUMMARY
 
@@ -119,7 +119,7 @@ jobs:
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git add .
         git commit -m "Update Wiki environment variables"
-        git push
+        git push -f
         
         NEW_COMMIT_HASH=$(git rev-parse HEAD)
         echo "Pushed Wiki environment variables changes: [$NEW_COMMIT_HASH](https://github.com/${{ github.repository }}/commit/$NEW_COMMIT_HASH)"  >> $GITHUB_STEP_SUMMARY
